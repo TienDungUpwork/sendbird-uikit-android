@@ -1343,6 +1343,30 @@ public class ChannelFragment extends BaseGroupChannelFragment implements OnIdent
                             break;
                         case VIEW_TYPE_FILE_MESSAGE_VIDEO_ME:
                         case VIEW_TYPE_FILE_MESSAGE_VIDEO_OTHER:
+                            FileMessage videoMessage = (FileMessage) message;
+                            boolean hasFile = FileDownloader.getInstance().hasFile(getContext(), videoMessage);
+                            if (hasFile) {
+                                File file = FileDownloader.getInstance().getDownloadFile(getContext(), videoMessage);
+                                showFile(file, videoMessage.getType());
+                            } else {
+                                Uri uri = Uri.parse(videoMessage.getPlainUrl());
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(uri, "video/mp4");
+                                startActivity(intent);
+                                FileDownloader.downloadFile(getContext(), videoMessage, new OnResultHandler<File>() {
+                                    @Override
+                                    public void onResult(File file) {
+
+                                    }
+
+                                    @Override
+                                    public void onError(SendBirdException e) {
+                                        toastError(R.string.sb_text_error_download_file);
+                                    }
+                                });
+                            }
+
+                            break;
                         case VIEW_TYPE_FILE_MESSAGE_ME:
                         case VIEW_TYPE_FILE_MESSAGE_OTHER:
                             FileMessage fileMessage = (FileMessage) message;
